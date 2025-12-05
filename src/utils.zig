@@ -10,9 +10,9 @@ pub const Data = struct {
     }
 };
 
-pub fn gen_iterator(allocator: std.mem.Allocator, path: []const u8) !Data {
+pub fn gen_iterator(allocator: std.mem.Allocator, path: []const u8, delimiter: u8) !Data {
     const content = try std.fs.cwd().readFileAlloc(allocator, path, 1024 * 1024); // max size 1mb
-    const iterator = std.mem.splitScalar(u8, content, '\n');
+    const iterator = std.mem.splitScalar(u8, content, delimiter);
 
     return Data{ .content = content, .iterator = iterator, .allocator = allocator };
 }

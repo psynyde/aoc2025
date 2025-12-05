@@ -6,11 +6,11 @@ pub fn main() !void {
     defer _ = gpa.deinit();
     const allocator = gpa.allocator();
 
-    var data_struct = try utils.gen_iterator(allocator, "./data/day1.txt");
+    var input = try utils.gen_iterator(allocator, "./data/day1.txt", '\n');
     // var data_struct = try utils.gen_iterator(allocator, "./data/day1_example.txt");
-    defer data_struct.deinit();
+    defer input.deinit();
 
-    var iter = data_struct.iterator;
+    var iter = input.iterator;
     var pointer: isize = 50;
     var pass_1: usize = 0;
     var pass_2: usize = 0;

@@ -11,12 +11,12 @@ fn get_joltage(allocator: std.mem.Allocator, line: []const u8, digits: u8) !usiz
         defer index += 1;
         try number.append(allocator, line[index]);
     }
-    std.debug.print("line: {s} - number: {s} - index @: {} aka {c}\n", .{
-        line,
-        number.items,
-        index,
-        line[index],
-    });
+    // std.debug.print("line: {s} - number: {s} - index @: {} aka {c}\n", .{
+    //     line,
+    //     number.items,
+    //     index,
+    //     line[index],
+    // });
 
     const number_len = number.items.len - 1;
     for (line[index..]) |item| {
@@ -46,13 +46,43 @@ fn get_joltage(allocator: std.mem.Allocator, line: []const u8, digits: u8) !usiz
             }
         }
     }
-    std.debug.print("biggest possible number: {s}\n", .{number.items});
+    // std.debug.print("biggest possible number: {s}\n", .{number.items});
     // 7 6 2 4 8 0 2 9
     // before pushing a u8 ahead make sure there's enough elements left to fill.
     // (line.len - 1) - index = items left
     // if (item + 1 > item) && (items left >= line.len) push to item.
     const result = try std.fmt.parseInt(usize, number.items, 10);
     return result;
+}
+
+// Find the largest digit in the remaining string that still leaves enough characters
+// to fill the remaining positions then add that digit to result and continue from
+// the next position after it.
+fn get_joltage_v2(allocator: std.mem.Allocator, line: []const u8, digits: u8) !usize {
+    var result = try std.ArrayList(u8).initCapacity(allocator, digits);
+    defer result.deinit(allocator);
+
+    var start_pos: usize = 0;
+
+    for (0..digits) |pos| {
+        const remaining_needed = digits - pos - 1;
+        const search_end = line.len - remaining_needed;
+
+        var max_digit: u8 = '0';
+        var max_pos: usize = start_pos;
+
+        for (start_pos..search_end) |i| {
+            if (line[i] > max_digit) {
+                max_digit = line[i];
+                max_pos = i;
+            }
+        }
+
+        try result.append(allocator, max_digit);
+        start_pos = max_pos + 1;
+    }
+
+    return try std.fmt.parseInt(usize, result.items, 10);
 }
 
 pub fn main() !void {
@@ -66,11 +96,15 @@ pub fn main() !void {
 
     var iter = input.iterator;
 
-    var result: usize = 0;
+    var solution_p1: usize = 0;
+    var solution_p2: usize = 0;
     while (iter.next()) |items| {
         if (items.len == 0) continue;
-        const res = try get_joltage(allocator, items, 12);
-        result += res;
+        const result_p1 = try get_joltage(allocator, items, 2);
+        solution_p1 += result_p1;
+
+        const result_p2 = try get_joltage_v2(allocator, items, 12);
+        solution_p2 += result_p2;
     }
-    std.debug.print("result: {}", .{result});
+    std.debug.print("result1: {} result_2: {}\n", .{ solution_p1, solution_p2});
 }
